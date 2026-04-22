@@ -40,18 +40,7 @@ A web-based personal finance management tool designed to help users track income
     source venv/bin/activate
     ```
 
-3.  **Install dependencies:**
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-4.  **Initialize the database:**
-    ```bash
-    flask db init
-    flask db upgrade
-    ```
-
-5.  **Run the application:**
+3.  **Run the application:**
     ```bash
     python app.py
     ```
