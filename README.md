@@ -1,5 +1,10 @@
 # Online Household Account Book
 
+Demo : https://onlinehousehold-3d9xh9u5c-kang851216s-projects.vercel.app/
+
+<img width="1030" height="1590" alt="image" src="https://github.com/user-attachments/assets/9a178093-8a1a-4800-8714-50b90fd95420" />
+
+
 A web-based personal finance management tool designed to help users track income, monitor expenses, and manage household budgets effectively. This project focuses on providing a clean, responsive interface for daily financial logging.
 
 ## 🚀 Features
