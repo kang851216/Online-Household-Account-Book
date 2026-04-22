@@ -1,0 +1,375 @@
+{
+  "entries": [
+    {
+      "date": "2026-03-25",
+      "category": "교통비",
+      "detail": "통근교통비",
+      "amount": 795,
+      "payment": "옥토퍼스",
+      "payer": "강경민",
+      "remark": "3/1~3/25",
+      "id": 1
+    },
+    {
+      "date": "2026-03-22",
+      "category": "외식",
+      "detail": "페어우드",
+      "amount": 171,
+      "payment": "옥토퍼스",
+      "payer": "강경민",
+      "remark": "",
+      "id": 2
+    },
+    {
+      "date": "2026-03-21",
+      "category": "외식",
+      "detail": "커피",
+      "amount": 181,
+      "payment": "옥토퍼스",
+      "payer": "강경민",
+      "remark": "3/7~3/21",
+      "id": 3
+    },
+    {
+      "date": "2026-03-24",
+      "category": "식생활",
+      "detail": "장보기",
+      "amount": 1550,
+      "payment": "옥토퍼스",
+      "payer": "강경민",
+      "remark": "3/1~3/25",
+      "id": 4
+    },
+    {
+      "date": "2026-03-23",
+      "category": "식생활",
+      "detail": "시율기저귀",
+      "amount": 71,
+      "payment": "신용카드",
+      "payer": "강경민",
+      "remark": "타오바오",
+      "id": 5
+    },
+    {
+      "date": "2026-03-20",
+      "category": "교육",
+      "detail": "소율 연필",
+      "amount": 71,
+      "payment": "신용카드",
+      "payer": "강경민",
+      "remark": "타오바오",
+      "id": 6
+    },
+    {
+      "date": "2026-03-16",
+      "category": "공과금",
+      "detail": "핸드폰요금",
+      "amount": 587,
+      "payment": "신용카드",
+      "payer": "강경민",
+      "remark": "3월분, 로밍추가",
+      "id": 7
+    },
+    {
+      "date": "2026-03-16",
+      "category": "식생활",
+      "detail": "기저귀, 유모차 바",
+      "amount": 248,
+      "payment": "신용카드",
+      "payer": "강경민",
+      "remark": "타오바오",
+      "id": 8
+    },
+    {
+      "date": "2026-03-14",
+      "category": "외식",
+      "detail": "페퍼런치",
+      "amount": 255,
+      "payment": "신용카드",
+      "payer": "강경민",
+      "remark": "",
+      "id": 9
+    },
+    {
+      "date": "2026-03-11",
+      "category": "공과금",
+      "detail": "전기세",
+      "amount": 367,
+      "payment": "신용카드",
+      "payer": "강경민",
+      "remark": "",
+      "id": 10
+    },
+    {
+      "date": "2026-03-08",
+      "category": "식생활",
+      "detail": "시율기저귀",
+      "amount": 71,
+      "payment": "신용카드",
+      "payer": "강경민",
+      "remark": "타오바오",
+      "id": 11
+    },
+    {
+      "date": "2026-02-28",
+      "category": "교통비",
+      "detail": "중국 띠디",
+      "amount": 50,
+      "payment": "신용카드",
+      "payer": "강경민",
+      "remark": "",
+      "id": 12
+    },
+    {
+      "date": "2026-02-28",
+      "category": "외식",
+      "detail": "중국 외식",
+      "amount": 210,
+      "payment": "신용카드",
+      "payer": "강경민",
+      "remark": "",
+      "id": 13
+    },
+    {
+      "date": "2026-02-28",
+      "category": "식생활",
+      "detail": "허마",
+      "amount": 170,
+      "payment": "신용카드",
+      "payer": "강경민",
+      "remark": "",
+      "id": 14
+    },
+    {
+      "date": "2026-02-28",
+      "category": "공과금",
+      "detail": "가스비",
+      "amount": 445,
+      "payment": "신용카드",
+      "payer": "강경민",
+      "remark": "",
+      "id": 15
+    },
+    {
+      "date": "2026-02-26",
+      "category": "식생활",
+      "detail": "수납함",
+      "amount": 55,
+      "payment": "신용카드",
+      "payer": "강경민",
+      "remark": "타오바오",
+      "id": 16
+    },
+    {
+      "date": "2026-02-26",
+      "category": "공과금",
+      "detail": "인터넷",
+      "amount": 279,
+      "payment": "신용카드",
+      "payer": "강경민",
+      "remark": "",
+      "id": 17
+    },
+    {
+      "date": "2026-02-26",
+      "category": "공과금",
+      "detail": "핸드폰요금",
+      "amount": 275,
+      "payment": "신용카드",
+      "payer": "강경민",
+      "remark": "2월분",
+      "id": 18
+    },
+    {
+      "date": "2026-03-10",
+      "category": "외식",
+      "detail": "피자헛",
+      "amount": 266,
+      "payment": "신용카드",
+      "payer": "강경민",
+      "remark": "",
+      "id": 19
+    },
+    {
+      "date": "2026-03-01",
+      "category": "기타",
+      "detail": "구글클라우드 구독료",
+      "amount": 42,
+      "payment": "신용카드",
+      "payer": "강경민",
+      "remark": "개인비용",
+      "id": 20
+    },
+    {
+      "date": "2026-02-26",
+      "category": "식생활",
+      "detail": "장보기",
+      "amount": 207,
+      "payment": "옥토퍼스",
+      "payer": "강경민",
+      "remark": "2/25~2/28",
+      "id": 21
+    },
+    {
+      "date": "2026-02-26",
+      "category": "교통비",
+      "detail": "통근교통비",
+      "amount": 210,
+      "payment": "옥토퍼스",
+      "payer": "강경민",
+      "remark": "2/25~2/28",
+      "id": 22
+    },
+    {
+      "date": "2026-03-21",
+      "category": "공과금",
+      "detail": "인터넷",
+      "amount": 279,
+      "payment": "신용카드",
+      "payer": "강경민",
+      "remark": "3월분",
+      "id": 23
+    },
+    {
+      "date": "2026-03-20",
+      "category": "기타",
+      "detail": "경민 전자키트",
+      "amount": 566,
+      "payment": "신용카드",
+      "payer": "강경민",
+      "remark": "타오바오",
+      "id": 24
+    },
+    {
+      "date": "2026-03-24",
+      "category": "헌금",
+      "detail": "3월 헌금",
+      "amount": 5370,
+      "payment": "현금",
+      "payer": "윤지현",
+      "remark": "3월 헌금",
+      "id": 25
+    },
+    {
+      "date": "2026-03-24",
+      "category": "식생활",
+      "detail": "3월 장보기",
+      "amount": 4008,
+      "payment": "현금",
+      "payer": "윤지현",
+      "remark": "3월 한달 장보기",
+      "id": 26
+    },
+    {
+      "date": "2026-03-24",
+      "category": "교육",
+      "detail": "소율 학원비",
+      "amount": 3180,
+      "payment": "현금",
+      "payer": "윤지현",
+      "remark": "3월 소율 학원비",
+      "id": 27
+    },
+    {
+      "date": "2026-03-24",
+      "category": "외식",
+      "detail": "3월 외식",
+      "amount": 1750,
+      "payment": "현금",
+      "payer": "윤지현",
+      "remark": "3월 외식비",
+      "id": 28
+    },
+    {
+      "date": "2026-03-24",
+      "category": "기타",
+      "detail": "패션비용",
+      "amount": 460,
+      "payment": "현금",
+      "payer": "윤지현",
+      "remark": "",
+      "id": 29
+    },
+    {
+      "date": "2026-03-24",
+      "category": "식생활",
+      "detail": "3월 생필품",
+      "amount": 390,
+      "payment": "현금",
+      "payer": "윤지현",
+      "remark": "3월 생필품",
+      "id": 30
+    },
+    {
+      "date": "2026-03-24",
+      "category": "대접비",
+      "detail": "대접비",
+      "amount": 297,
+      "payment": "현금",
+      "payer": "윤지현",
+      "remark": "",
+      "id": 31
+    },
+    {
+      "date": "2026-03-24",
+      "category": "공과금",
+      "detail": "지현 핸드폰비",
+      "amount": 244,
+      "payment": "현금",
+      "payer": "윤지현",
+      "remark": "",
+      "id": 32
+    },
+    {
+      "date": "2026-03-24",
+      "category": "교통비",
+      "detail": "교통비",
+      "amount": 100,
+      "payment": "현금",
+      "payer": "윤지현",
+      "remark": "",
+      "id": 33
+    },
+    {
+      "id": 34,
+      "date": "2026-03-06",
+      "category": "기타",
+      "detail": "3월 방세",
+      "amount": 16800,
+      "payment": "현금",
+      "payer": "강경민",
+      "remark": ""
+    },
+    {
+      "date": "2026-03-24",
+      "category": "교통비",
+      "detail": "지현 교통비",
+      "amount": 303,
+      "payment": "현금",
+      "payer": "강경민",
+      "remark": "",
+      "id": 35
+    },
+    {
+      "date": "2026-03-24",
+      "category": "대접비",
+      "detail": "대접비",
+      "amount": 3432,
+      "payment": "현금",
+      "payer": "윤지현",
+      "remark": "",
+      "id": 36
+    }
+  ],
+  "categories": [
+    "식생활",
+    "외식",
+    "헌금",
+    "교육",
+    "교통비",
+    "대접비",
+    "공과금",
+    "월세",
+    "기타"
+  ]
+}

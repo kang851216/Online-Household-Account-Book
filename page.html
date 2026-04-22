@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>가계부 시스템 - 실제 JSON 파일 자동 저장</title>
+    <!-- Chart.js CDN for bar charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- Flatpickr for date picker (달력) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Roboto', 'Noto Sans', system-ui, sans-serif;
+        }
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #f0f2f5;
+            min-height: 100vh;
+            display: flex;
+        }
+        .left-frame {
+            width: 58%;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            margin-right: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 20px 24px;
+        }
+        .right-frame {
+            width: 42%;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding: 20px 24px;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+                padding: 12px;
+            }
+            .left-frame {
+                width: 100%;
+                margin-right: 0;
+                margin-bottom: 16px;
+                order: 1;
+            }
+            .right-frame {
+                width: 100%;
+                order: 2;
+            }
+        }
+        
+        .input-area {
+            background: #fef9e8;
+            padding: 16px 20px;
+            border-radius: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 14px;
+            align-items: flex-end;
+        }
+        .form-group {
+            flex: 1 0 150px;
+            display: flex;
+            flex-direction: column;
+        }
+        .form-group label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #5e5c5a;
+            margin-bottom: 4px;
+            letter-spacing: -0.2px;
+        }
+        .category-group {
+            position: relative;
+        }
+        .category-input-wrapper {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .add-category-btn {
+            background: #ff8c42;
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 14px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            white-space: nowrap;
+        }
+        .add-category-btn:hover {
+            background: #e67e2e;
+        }
+        input, select, textarea {
+            padding: 8px 10px;
+            border-radius: 14px;
+            border: 1px solid #ddd;
+            background: white;
+            font-size: 0.85rem;
+            transition: 0.2s;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #ff8c42;
+            box-shadow: 0 0 0 2px rgba(255,140,66,0.2);
+        }
+        .btn-primary {
+            background: #ff8c42;
+            border: none;
+            color: white;
+            font-weight: bold;
+            padding: 8px 20px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.85rem;
+            margin-top: 20px;
+            align-self: flex-end;
+        }
+        .btn-primary:hover {
+            background: #e67e2e;
+            transform: scale(0.97);
+        }
+        .file-status {
+            background: #e8f0fe;
+            padding: 8px 12px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            font-size: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .status-text {
+            color: #2c3e66;
+        }
+        .auto-save-badge {
+            background: #4cae4c;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+        }
+        .file-path-info {
+            background: #f0f0f0;
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 0.65rem;
+            color: #666;
+            word-break: break-all;
+        }
+        .history-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            margin-top: 8px;
+            min-height: 0;
+        }
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 12px;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .sort-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .sort-btn {
+            background: #e9ecef;
+            border: none;
+            border-radius: 20px;
+            padding: 4px 10px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            transition: 0.2s;
+        }
+        .sort-btn.active {
+            background: #ff8c42;
+            color: white;
+        }
+        .sort-btn:hover {
+            background: #dee2e6;
+        }
+        .pagination {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .page-btn {
+            background: #e9ecef;
+            border: none;
+            border-radius: 20px;
+            padding: 4px 12px;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+        .table-container {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: auto;
+            min-height: 380px;
+            max-height: 450px;
+            border-radius: 16px;
+            border: 1px solid #eee;
+            background: #fff;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.7rem;
+            table-layout: fixed;
+        }
+        th {
+            background: #f8f9fa;
+            position: sticky;
+            top: 0;
+            padding: 10px 6px;
+            font-weight: 600;
+            z-index: 10;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s;
+        }
+        th:hover {
+            background: #e9ecef;
+        }
+        th.sort-asc::after {
+            content: " ▲";
+            font-size: 0.6rem;
+        }
+        th.sort-desc::after {
+            content: " ▼";
+            font-size: 0.6rem;
+        }
+        th:nth-child(1) { width: 85px; }
+        th:nth-child(2) { width: 80px; }
+        th:nth-child(3) { width: 90px; }
+        th:nth-child(4) { width: 70px; }
+        th:nth-child(5) { width: 80px; }
+        th:nth-child(6) { width: 70px; }
+        th:nth-child(7) { width: 85px; }
+        th:nth-child(8) { width: 95px; }
+        
+        td {
+            border-bottom: 1px solid #eee;
+            padding: 8px 6px;
+            text-align: left;
+            vertical-align: middle;
+            word-break: break-word;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .action-btns {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .edit-btn, .save-edit-btn, .delete-btn {
+            background: #e2e6ea;
+            border: none;
+            border-radius: 30px;
+            padding: 4px 8px;
+            font-size: 0.65rem;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .save-edit-btn {
+            background: #4cae4c;
+            color: white;
+        }
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+        }
+        .delete-btn:hover {
+            background: #c82333;
+        }
+        .edit-btn:hover {
+            background: #ffc107;
+        }
+        .edit-input, .edit-select {
+            width: 100%;
+            padding: 4px 6px;
+            font-size: 0.7rem;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+        .edit-date-input {
+            width: 100%;
+            padding: 4px 4px;
+            font-size: 0.7rem;
+        }
+        .stat-card {
+            margin-bottom: 28px;
+        }
+        .stat-title {
+            font-weight: bold;
+            font-size: 1rem;
+            margin-bottom: 8px;
+            border-left: 5px solid #ff8c42;
+            padding-left: 12px;
+        }
+        .total-amount {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #2c3e66;
+            margin: 12px 0;
+        }
+        .horizontal-bar {
+            background: #f0f0f0;
+            border-radius: 20px;
+            height: 40px;
+            width: 100%;
+            display: flex;
+            overflow: hidden;
+            margin: 12px 0;
+        }
+        .bar-segment {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: bold;
+            text-shadow: 0 0 2px rgba(0,0,0,0.3);
+        }
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 8px;
+            font-size: 0.7rem;
+        }
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            display: inline-block;
+            border-radius: 4px;
+            margin-right: 4px;
+        }
+        canvas#monthlyBarChart {
+            max-height: 220px;
+            width: 100%;
+        }
+        .month-selector {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background: #fef3e2;
+            padding: 10px 16px;
+            border-radius: 40px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .note-text {
+            font-size: 0.7rem;
+            color: gray;
+        }
+        .init-file-btn {
+            background: #ff8c42;
+            border: none;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.7rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="left-frame">
+    <div class="file-status">
+        <span class="status-text">📁 실제 파일 저장 모드: <strong>data.json</strong></span>
+        <span class="auto-save-badge">💾 자동 저장</span>
+    </div>
+    <div class="file-path-info" id="filePathInfo">
+        ⚠️ 파일을 선택해주세요 (첫 실행 시 파일 선택 필요)
+    </div>
+    <div class="input-area">
+        <h3 style="margin:0 0 12px 0;">➕ 지출 입력</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label>📅 날짜</label>
+                <input type="text" id="dateInput" placeholder="날짜 선택" readonly>
+            </div>
+            <div class="form-group category-group">
+                <label>📂 카테고리</label>
+                <div class="category-input-wrapper">
+                    <select id="categorySelect" style="flex:1;">
+                        <option value="식생활">식생활</option>
+                        <option value="외식">외식</option>
+                        <option value="헌금">헌금</option>
+                        <option value="교육">교육</option>
+                        <option value="교통비">교통비</option>
+                        <option value="대접비">대접비</option>
+                        <option value="공과금">공과금</option>
+                        <option value="기타">기타</option>
+                    </select>
+                    <button type="button" id="addCategoryBtn" class="add-category-btn">+ 추가</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>📝 내역</label>
+                <input type="text" id="detailInput" placeholder="ex) 저녁 식사">
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>💰 금액 (HKD)</label>
+                <input type="number" id="amountInput" placeholder="0">
+            </div>
+            <div class="form-group">
+                <label>💳 결제수단</label>
+                <select id="paymentSelect">
+                    <option value="현금">현금</option>
+                    <option value="신용카드">신용카드</option>
+                    <option value="옥토퍼스">옥토퍼스</option>
+                    <option value="위챗/알리">위챗/알리</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>👤 결제인</label>
+                <select id="payerSelect">
+                    <option value="윤지현">윤지현</option>
+                    <option value="강경민">강경민</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group" style="flex:2">
+                <label>✏️ 비고</label>
+                <textarea id="remarkInput" rows="1" placeholder="추가 메모"></textarea>
+            </div>
+            <button class="btn-primary" id="saveEntryBtn">➕ 입력 저장</button>
+        </div>
+        <div class="note-text">* 데이터는 실제 data.json 파일에 자동 저장됩니다. 첫 실행 시 파일을 선택해주세요.</div>
+    </div>
+
+    <div class="history-section">
+        <div class="history-header">
+            <strong>📋 최근 내역 (최신순, 페이지)</strong>
+            <div class="sort-controls">
+                <span style="font-size:0.7rem;">정렬: </span>
+                <button class="sort-btn" data-sort="date">📅 날짜</button>
+                <button class="sort-btn" data-sort="category">📂 카테고리</button>
+                <button class="sort-btn" data-sort="detail">📝 내역</button>
+                <button class="sort-btn" data-sort="amount">💰 금액</button>
+                <button class="sort-btn" data-sort="payment">💳 결제수단</button>
+                <button class="sort-btn" data-sort="payer">👤 결제인</button>
+            </div>
+            <div class="pagination">
+                <button class="page-btn" id="prevPageBtn">◀ 이전</button>
+                <span id="pageIndicator">1</span>
+                <button class="page-btn" id="nextPageBtn">다음 ▶</button>
+            </div>
+        </div>
+        <div class="table-container">
+            <table id="entriesTable">
+                <thead>
+                    <tr>
+                        <th data-sort-key="date">📅 날짜</th>
+                        <th data-sort-key="category">📂 카테고리</th>
+                        <th data-sort-key="detail">📝 내역</th>
+                        <th data-sort-key="amount">💰 금액(HKD)</th>
+                        <th data-sort-key="payment">💳 결제수단</th>
+                        <th data-sort-key="payer">👤 결제인</th>
+                        <th>✏️ 비고</th>
+                        <th>⚙️ 관리</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr><td colspan="8">파일을 선택해주세요...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="right-frame">
+    <div class="month-selector">
+        <span>📆 통계 기준 월:</span>
+        <input type="month" id="monthPicker" style="width:160px; padding:6px 10px; border-radius: 40px;">
+        <button id="selectFileBtn" class="init-file-btn">📂 파일 선택/변경</button>
+    </div>
+    <div class="stat-card">
+        <div class="stat-title">💰 해당월 총 지출</div>
+        <div class="total-amount" id="totalMonthAmount">0 HKD</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-title">📊 카테고리별 비율</div>
+        <div class="horizontal-bar" id="categoryBar"></div>
+        <div id="categoryLegend" class="legend"></div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-title">💳 결제수단별 비율</div>
+        <div class="horizontal-bar" id="paymentBar"></div>
+        <div id="paymentLegend" class="legend"></div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-title">👥 결제인별 비율</div>
+        <div class="horizontal-bar" id="payerBar"></div>
+        <div id="payerLegend" class="legend"></div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-title">📈 월별 지출 추이</div>
+        <canvas id="monthlyBarChart" width="400" height="200" style="max-height: 220px;"></canvas>
+    </div>
+</div>
+
+<script>
+    let allEntries = [];
+    let currentPage = 1;
+    const PAGE_SIZE = 10;
+    let monthlyChart = null;
+    let currentFileHandle = null;  // 파일 핸들 저장
+    let customCategories = ['식생활', '외식', '헌금', '교육', '교통비', '대접비', '공과금', '기타'];
+    
+    // 정렬 상태 관리
+    let currentSortKey = 'date';
+    let currentSortOrder = 'desc';
+    
+    function escapeHtml(str) {
+        if(!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if(m === '&') return '&amp;';
+            if(m === '<') return '&lt;';
+            if(m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    // 카테고리 셀렉트 업데이트
+    function updateCategorySelects() {
+        const selects = document.querySelectorAll('#categorySelect, .edit-category-select');
+        selects.forEach(select => {
+            if(select && select.tagName === 'SELECT') {
+                const currentValue = select.value;
+                select.innerHTML = '';
+                customCategories.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat;
+                    option.textContent = cat;
+                    if(cat === currentValue) option.selected = true;
+                    select.appendChild(option);
+                });
+            }
+        });
+    }
+    
+    // 새 카테고리 추가
+    function addNewCategory() {
+        const newCategory = prompt('새 카테고리 이름을 입력하세요:', '');
+        if(newCategory && newCategory.trim()) {
+            const catName = newCategory.trim();
+            if(!customCategories.includes(catName)) {
+                customCategories.push(catName);
+                updateCategorySelects();
+                saveCategoriesToFile();  // 카테고리 저장
+                alert(`"${catName}" 카테고리가 추가되었습니다.`);
+            } else {
+                alert('이미 존재하는 카테고리입니다.');
+            }
+        }
+    }
+    
+    // 카테고리만 파일에 저장
+    async function saveCategoriesToFile() {
+        if(!currentFileHandle) return;
+        try {
+            const dataToSave = {
+                entries: allEntries,
+                categories: customCategories
+            };
+            const jsonData = JSON.stringify(dataToSave, null, 2);
+            const writable = await currentFileHandle.createWritable();
+            await writable.write(jsonData);
+            await writable.close();
+            console.log('카테고리 저장 완료');
+        } catch(err) {
+            console.error('카테고리 저장 실패:', err);
+        }
+    }
+    
+    // 정렬 함수
+    function sortEntries() {
+        allEntries.sort((a, b) => {
+            let valA, valB;
+            switch(currentSortKey) {
+                case 'date': valA = new Date(a.date); valB = new Date(b.date); break;
+                case 'amount': valA = a.amount; valB = b.amount; break;
+                case 'category': valA = a.category || ''; valB = b.category || ''; break;
+                case 'detail': valA = a.detail || ''; valB = b.detail || ''; break;
+                case 'payment': valA = a.payment || ''; valB = b.payment || ''; break;
+                case 'payer': valA = a.payer || ''; valB = b.payer || ''; break;
+                default: valA = a.date; valB = b.date;
+            }
+            if (valA < valB) return currentSortOrder === 'asc' ? -1 : 1;
+            if (valA > valB) return currentSortOrder === 'asc' ? 1 : -1;
+            return 0;
+        });
+    }
+    
+    function applySort(sortKey) {
+        if (currentSortKey === sortKey) {
+            currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
+        } else {
+            currentSortKey = sortKey;
+            currentSortOrder = 'desc';
+        }
+        sortEntries();
+        currentPage = 1;
+        renderLeftTable();
+        updateSortButtonUI();
+    }
+    
+    function updateSortButtonUI() {
+        document.querySelectorAll('.sort-btn').forEach(btn => {
+            const sortValue = btn.getAttribute('data-sort');
+            if (sortValue === currentSortKey) {
+                btn.classList.add('active');
+                btn.textContent = `${getSortLabel(sortValue)} ${currentSortOrder === 'asc' ? '↑' : '↓'}`;
+            } else {
+                btn.classList.remove('active');
+                btn.textContent = getSortLabel(sortValue);
+            }
+        });
+        document.querySelectorAll('th[data-sort-key]').forEach(th => {
+            const key = th.getAttribute('data-sort-key');
+            th.classList.remove('sort-asc', 'sort-desc');
+            if (key === currentSortKey) {
+                th.classList.add(currentSortOrder === 'asc' ? 'sort-asc' : 'sort-desc');
+            }
+        });
+    }
+    
+    function getSortLabel(key) {
+        const labels = {
+            date: '📅 날짜', category: '📂 카테고리', detail: '📝 내역',
+            amount: '💰 금액', payment: '💳 결제수단', payer: '👤 결제인'
+        };
+        return labels[key] || key;
+    }
+    
+    // 파일에 전체 데이터 저장
+    async function saveToFile() {
+        if(!currentFileHandle) {
+            console.log('파일 핸들이 없습니다. 먼저 파일을 선택해주세요.');
+            return false;
+        }
+        try {
+            const dataToSave = {
+                entries: allEntries,
+                categories: customCategories
+            };
+            const jsonData = JSON.stringify(dataToSave, null, 2);
+            const writable = await currentFileHandle.createWritable();
+            await writable.write(jsonData);
+            await writable.close();
+            console.log('파일 저장 완료');
+            return true;
+        } catch(err) {
+            console.error('파일 저장 실패:', err);
+            return false;
+        }
+    }
+    
+    // 파일에서 데이터 불러오기
+    async function loadFromFile(fileHandle) {
+        try {
+            const file = await fileHandle.getFile();
+            const text = await file.text();
+            const data = JSON.parse(text);
+            
+            if(data.entries && Array.isArray(data.entries)) {
+                allEntries = data.entries;
+            } else if(Array.isArray(data)) {
+                allEntries = data;
+            } else {
+                allEntries = [];
+            }
+            
+            if(data.categories && Array.isArray(data.categories)) {
+                customCategories = data.categories;
+            }
+            
+            sortEntries();
+            updateCategorySelects();
+            renderLeftTable();
+            updateStatisticsAndCharts();
+            
+            // 파일 경로 표시
+            const pathInfo = document.getElementById('filePathInfo');
+            pathInfo.innerHTML = `📁 현재 파일: ${fileHandle.name} (${(file.size / 1024).toFixed(1)} KB)`;
+            
+            return true;
+        } catch(err) {
+            console.error('파일 읽기 실패:', err);
+            alert('파일 읽기에 실패했습니다: ' + err.message);
+            return false;
+        }
+    }
+    
+    // 파일 선택
+    async function selectFile() {
+        try {
+            const [fileHandle] = await window.showOpenFilePicker({
+                types: [{
+                    description: 'JSON 파일',
+                    accept: { 'application/json': ['.json'] }
+                }],
+                suggestedName: 'data.json'
+            });
+            currentFileHandle = fileHandle;
+            await loadFromFile(fileHandle);
+            
+            // 파일 선택 후 자동 저장을 위한 권한 유지
+            if(await fileHandle.queryPermission({ mode: 'readwrite' }) !== 'granted') {
+                await fileHandle.requestPermission({ mode: 'readwrite' });
+            }
+            
+        } catch(err) {
+            if(err.name !== 'AbortError') {
+                console.error('파일 선택 오류:', err);
+                alert('파일 선택 중 오류가 발생했습니다.');
+            }
+        }
+    }
+    
+    // 새 파일 생성 (첫 실행 시)
+    async function createNewFile() {
+        try {
+            const fileHandle = await window.showSaveFilePicker({
+                types: [{
+                    description: 'JSON 파일',
+                    accept: { 'application/json': ['.json'] }
+                }],
+                suggestedName: 'data.json'
+            });
+            currentFileHandle = fileHandle;
+            
+            // 샘플 데이터 생성
+            allEntries = [
+                { id: Date.now()+1, date: new Date().toISOString().slice(0,10), category: "외식", detail: "스시 오마카세", amount: 380, payment: "신용카드", payer: "윤지현", remark: "일식당" },
+                { id: Date.now()+2, date: new Date().toISOString().slice(0,10), category: "교통비", detail: "택시", amount: 75, payment: "현금", payer: "강경민", remark: "출장" }
+            ];
+            customCategories = ['식생활', '외식', '헌금', '교육', '교통비', '대접비', '공과금', '기타'];
+            
+            const dataToSave = {
+                entries: allEntries,
+                categories: customCategories
+            };
+            const jsonData = JSON.stringify(dataToSave, null, 2);
+            const writable = await fileHandle.createWritable();
+            await writable.write(jsonData);
+            await writable.close();
+            
+            sortEntries();
+            updateCategorySelects();
+            renderLeftTable();
+            updateStatisticsAndCharts();
+            
+            const pathInfo = document.getElementById('filePathInfo');
+            pathInfo.innerHTML = `📁 새 파일 생성됨: ${fileHandle.name}`;
+            
+        } catch(err) {
+            if(err.name !== 'AbortError') {
+                console.error('파일 생성 오류:', err);
+            }
+        }
+    }
+    
+    // 데이터 변경 시 자동 저장
+    async function onDataChanged() {
+        sortEntries();
+        renderLeftTable();
+        updateStatisticsAndCharts();
+        if(currentFileHandle) {
+            await saveToFile();
+        }
+    }
+    
+    // UI 렌더링
+    function renderLeftTable() {
+        const totalPages = Math.ceil(allEntries.length / PAGE_SIZE);
+        if(currentPage > totalPages && totalPages > 0) currentPage = totalPages;
+        if(currentPage < 1) currentPage = 1;
+        const startIdx = (currentPage-1) * PAGE_SIZE;
+        const pageEntries = allEntries.slice(startIdx, startIdx + PAGE_SIZE);
+        const tbody = document.getElementById("tableBody");
+        
+        if(pageEntries.length === 0) {
+            tbody.innerHTML = "<tr><td colspan='8' style='text-align:center;'>내역이 없습니다</td></tr>";
+            document.getElementById("pageIndicator").innerText = currentPage;
+            return;
+        }
+        
+        let html = "";
+        for(let entry of pageEntries) {
+            html += `<tr data-id="${entry.id}">
+                        <td class="cell-date">${escapeHtml(entry.date || '')}</td>
+                        <td class="cell-category">${escapeHtml(entry.category || '')}</td>
+                        <td class="cell-detail">${escapeHtml(entry.detail || '')}</td>
+                        <td class="cell-amount">${entry.amount ? entry.amount.toLocaleString() : '0'}</td>
+                        <td class="cell-payment">${escapeHtml(entry.payment || '')}</td>
+                        <td class="cell-payer">${escapeHtml(entry.payer || '')}</td>
+                        <td class="cell-remark">${escapeHtml(entry.remark || '')}</td>
+                        <td class="action-btns">
+                            <button class="edit-btn" data-id="${entry.id}">수정</button>
+                            <button class="delete-btn" data-id="${entry.id}">삭제</button>
+                            <button class="save-edit-btn" data-id="${entry.id}" style="display:none;">확인</button>
+                        </td>
+                    </tr>`;
+        }
+        tbody.innerHTML = html;
+        document.getElementById("pageIndicator").innerText = currentPage;
+        
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const row = btn.closest('tr');
+                const entryId = parseInt(btn.getAttribute('data-id'));
+                enableRowEdit(row, entryId);
+            });
+        });
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const entryId = parseInt(btn.getAttribute('data-id'));
+                deleteEntryById(entryId);
+            });
+        });
+        document.querySelectorAll('.save-edit-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const row = btn.closest('tr');
+                const entryId = parseInt(btn.getAttribute('data-id'));
+                saveRowEdit(row, entryId);
+            });
+        });
+    }
+    
+    function enableRowEdit(row, entryId) {
+        const originalEntry = allEntries.find(e => e.id === entryId);
+        if(!originalEntry) return;
+        
+        const dateCell = row.cells[0];
+        const categoryCell = row.cells[1];
+        const detailCell = row.cells[2];
+        const amountCell = row.cells[3];
+        const paymentCell = row.cells[4];
+        const payerCell = row.cells[5];
+        const remarkCell = row.cells[6];
+        
+        dateCell.innerHTML = `<input type="date" class="edit-date-input" value="${originalEntry.date}" style="width:100%;">`;
+        
+        let catOptions = `<select class="edit-select edit-category-select" style="width:100%;">`;
+        customCategories.forEach(c => { 
+            catOptions += `<option value="${c}" ${c===originalEntry.category ? 'selected' : ''}>${c}</option>`; 
+        });
+        catOptions += `</select>`;
+        categoryCell.innerHTML = catOptions;
+        
+        detailCell.innerHTML = `<input class="edit-input" value="${escapeHtml(originalEntry.detail)}" style="width:100%;">`;
+        amountCell.innerHTML = `<input class="edit-input" type="number" value="${originalEntry.amount}" style="width:100%;">`;
+        paymentCell.innerHTML = `<select class="edit-select" style="width:100%;">
+            <option ${originalEntry.payment==='현금' ? 'selected':''}>현금</option>
+            <option ${originalEntry.payment==='신용카드' ? 'selected':''}>신용카드</option>
+            <option ${originalEntry.payment==='옥토퍼스' ? 'selected':''}>옥토퍼스</option>
+            <option ${originalEntry.payment==='위챗/알리' ? 'selected':''}>위챗/알리</option>
+        </select>`;
+        payerCell.innerHTML = `<select class="edit-select" style="width:100%;">
+            <option ${originalEntry.payer==='윤지현' ? 'selected':''}>윤지현</option>
+            <option ${originalEntry.payer==='강경민' ? 'selected':''}>강경민</option>
+        </select>`;
+        remarkCell.innerHTML = `<input class="edit-input" value="${escapeHtml(originalEntry.remark)}" style="width:100%;">`;
+        
+        const editBtn = row.querySelector('.edit-btn');
+        const deleteBtn = row.querySelector('.delete-btn');
+        const saveBtn = row.querySelector('.save-edit-btn');
+        if(editBtn) editBtn.style.display = 'none';
+        if(deleteBtn) deleteBtn.style.display = 'none';
+        if(saveBtn) saveBtn.style.display = 'inline-block';
+    }
+    
+    async function saveRowEdit(row, entryId) {
+        const entryIndex = allEntries.findIndex(e => e.id === entryId);
+        if(entryIndex === -1) return;
+        const updatedEntry = {...allEntries[entryIndex]};
+        
+        updatedEntry.date = row.cells[0].querySelector('input')?.value || updatedEntry.date;
+        updatedEntry.category = row.cells[1].querySelector('.edit-select')?.value || updatedEntry.category;
+        updatedEntry.detail = row.cells[2].querySelector('.edit-input')?.value || updatedEntry.detail;
+        updatedEntry.amount = parseInt(row.cells[3].querySelector('.edit-input')?.value) || 0;
+        updatedEntry.payment = row.cells[4].querySelector('.edit-select')?.value || updatedEntry.payment;
+        updatedEntry.payer = row.cells[5].querySelector('.edit-select')?.value || updatedEntry.payer;
+        updatedEntry.remark = row.cells[6].querySelector('.edit-input')?.value || updatedEntry.remark;
+        
+        allEntries[entryIndex] = updatedEntry;
+        await onDataChanged();
+    }
+    
+    async function deleteEntryById(entryId) {
+        if(confirm("정말 삭제하시겠습니까?")) {
+            allEntries = allEntries.filter(entry => entry.id !== entryId);
+            const totalPages = Math.ceil(allEntries.length / PAGE_SIZE);
+            if(currentPage > totalPages && totalPages > 0) currentPage = totalPages;
+            if(currentPage < 1) currentPage = 1;
+            await onDataChanged();
+        }
+    }
+    
+    async function addNewEntry() {
+        const date = document.getElementById("dateInput").value;
+        const category = document.getElementById("categorySelect").value;
+        const detail = document.getElementById("detailInput").value.trim();
+        let amount = parseInt(document.getElementById("amountInput").value);
+        if(isNaN(amount)) amount = 0;
+        const payment = document.getElementById("paymentSelect").value;
+        const payer = document.getElementById("payerSelect").value;
+        const remark = document.getElementById("remarkInput").value.trim();
+        
+        if(!date) { alert("날짜를 선택해주세요"); return; }
+        if(amount <= 0) { alert("금액을 올바르게 입력해주세요"); return; }
+        
+        const newId = Date.now();
+        const newEntry = { id: newId, date, category, detail, amount, payment, payer, remark };
+        allEntries.push(newEntry);
+        
+        document.getElementById("detailInput").value = "";
+        document.getElementById("amountInput").value = "";
+        document.getElementById("remarkInput").value = "";
+        
+        await onDataChanged();
+    }
+    
+    // 통계 함수들
+    function getEntriesByMonth(monthStr) {
+        if(!monthStr) return [];
+        return allEntries.filter(entry => entry.date && entry.date.startsWith(monthStr));
+    }
+    
+    function updateStatisticsAndCharts() {
+        const month = document.getElementById("monthPicker").value;
+        if(!month) return;
+        const monthEntries = getEntriesByMonth(month);
+        const total = monthEntries.reduce((sum, e) => sum + e.amount, 0);
+        document.getElementById("totalMonthAmount").innerHTML = total.toLocaleString() + " HKD";
+        
+        const catMap = new Map(), payMap = new Map(), payerMap = new Map();
+        monthEntries.forEach(e => {
+            if(e.amount > 0) {
+                catMap.set(e.category, (catMap.get(e.category)||0) + e.amount);
+                payMap.set(e.payment, (payMap.get(e.payment)||0) + e.amount);
+                payerMap.set(e.payer, (payerMap.get(e.payer)||0) + e.amount);
+            }
+        });
+        drawHorizontalBar("categoryBar", catMap, total, "categoryLegend");
+        drawHorizontalBar("paymentBar", payMap, total, "paymentLegend");
+        drawHorizontalBar("payerBar", payerMap, total, "payerLegend");
+        
+        const selectedYear = month.split("-")[0];
+        const currentMonthNum = parseInt(month.split("-")[1]);
+        const monthlyAgg = [];
+        for(let m=1; m<=currentMonthNum; m++) {
+            const monthStr = `${selectedYear}-${String(m).padStart(2,'0')}`;
+            const sum = getEntriesByMonth(monthStr).reduce((s,e)=>s+e.amount,0);
+            monthlyAgg.push(sum);
+        }
+        const labels = monthlyAgg.map((_,idx)=>`${idx+1}월`);
+        const ctx = document.getElementById('monthlyBarChart').getContext('2d');
+        if(monthlyChart) monthlyChart.destroy();
+        monthlyChart = new Chart(ctx, {
+            type: 'bar',
+            data: { labels: labels, datasets: [{ label: '지출액 (HKD)', data: monthlyAgg, backgroundColor: '#ff8c42', borderRadius: 8 }] },
+            options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'top' } } }
+        });
+    }
+    
+    function drawHorizontalBar(containerId, dataMap, total, legendId) {
+        const container = document.getElementById(containerId);
+        if(!container) return;
+        if(total === 0) {
+            container.innerHTML = `<div style="width:100%; background:#eee; text-align:center; line-height:40px;">데이터 없음</div>`;
+            document.getElementById(legendId).innerHTML = "";
+            return;
+        }
+        const entries = Array.from(dataMap.entries()).sort((a,b)=>b[1]-a[1]);
+        container.innerHTML = "";
+        const colors = ["#FFB347","#4CAF50","#2196F3","#9C27B0","#FF5722","#607D8B","#E91E63","#00BCD4","#CDDC39","#FFC107"];
+        let colorIdx = 0;
+        entries.forEach(([label, value]) => {
+            const percent = (value / total) * 100;
+            if(percent < 0.5) return;
+            const seg = document.createElement("div");
+            seg.className = "bar-segment";
+            seg.style.width = `${percent}%`;
+            seg.style.backgroundColor = colors[colorIdx % colors.length];
+            seg.innerText = `${label} ${Math.round(percent)}%`;
+            container.appendChild(seg);
+            colorIdx++;
+        });
+        const legendDiv = document.getElementById(legendId);
+        legendDiv.innerHTML = "";
+        colorIdx = 0;
+        entries.forEach(([label, val]) => {
+            const percent = (val/total)*100;
+            if(percent>=0.5){
+                const span = document.createElement("span");
+                span.innerHTML = `<span class="legend-color" style="background:${colors[colorIdx%colors.length]}"></span> ${label} (${Math.round(percent)}%)`;
+                legendDiv.appendChild(span);
+                colorIdx++;
+            }
+        });
+    }
+    
+    function onMonthChange() {
+        updateStatisticsAndCharts();
+    }
+    
+    function setupPagination() {
+        document.getElementById("prevPageBtn").onclick = () => {
+            if(currentPage > 1) { currentPage--; renderLeftTable(); }
+        };
+        document.getElementById("nextPageBtn").onclick = () => {
+            const totalPages = Math.ceil(allEntries.length / PAGE_SIZE);
+            if(currentPage < totalPages) { currentPage++; renderLeftTable(); }
+        };
+    }
+    
+    // 초기화
+    async function init() {
+        flatpickr("#dateInput", { dateFormat: "Y-m-d", defaultDate: new Date() });
+        document.getElementById("dateInput").value = new Date().toISOString().slice(0,10);
+        const today = new Date();
+        const defaultMonth = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
+        document.getElementById("monthPicker").value = defaultMonth;
+        
+        setupPagination();
+        updateSortButtonUI();
+        
+        document.getElementById("saveEntryBtn").addEventListener("click", addNewEntry);
+        document.getElementById("monthPicker").addEventListener("change", onMonthChange);
+        document.getElementById("addCategoryBtn").addEventListener("click", addNewCategory);
+        document.getElementById("selectFileBtn").addEventListener("click", selectFile);
+        
+        document.querySelectorAll('.sort-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const sortKey = btn.getAttribute('data-sort');
+                applySort(sortKey);
+            });
+        });
+        
+        document.querySelectorAll('th[data-sort-key]').forEach(th => {
+            th.addEventListener('click', () => {
+                const sortKey = th.getAttribute('data-sort-key');
+                applySort(sortKey);
+            });
+        });
+        
+        // 첫 실행 시 파일 선택 안내
+        const pathInfo = document.getElementById('filePathInfo');
+        pathInfo.innerHTML = '📌 "파일 선택/변경" 버튼을 눌러 data.json 파일을 선택하거나 새로 만들어주세요.';
+    }
+    
+    init();
+</script>
+</body>
+</html>
